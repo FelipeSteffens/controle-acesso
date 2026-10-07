@@ -171,7 +171,7 @@ export default function Home({ session, onLogout }: Props) {
                   </div>
                 )}
               </div>
-              {/* Esconder o botão ajuda na interface; a proteção fica na API. */}
+              
               {isAdmin ? (
                 <button className="danger" disabled={deleting !== null} onClick={() => remove(material)}>
                   {deleting === material.id ? "Excluindo..." : "Excluir"}

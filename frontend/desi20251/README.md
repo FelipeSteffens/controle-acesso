@@ -1,61 +1,37 @@
-﻿# Front-end da aula: login e permissões
+﻿This is a [Next.js](https://nextjs.org) project bootstrapped with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Interface simples em Next.js, React e TypeScript, com CSS comum e comentários em português.
+## Getting Started
 
-## Executar
+First, run the development server:
 
-No terminal, dentro de `frontend/desi20251`:
-
-```bash
-npm install
+bash
 npm run dev
-```
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 
-Abra http://localhost:3000. A API usa `http://localhost:8081/api` por padrão. Para mudar, copie `.env.example` para `.env.local`, ajuste `NEXT_PUBLIC_API_URL` e reinicie o front-end.
 
-O back-end e o MySQL precisam estar ativos. Prepare a tabela com `backend/sql/users.sql` no banco configurado em `DB_NAME`. Se a tabela já existir, confira os campos e a restrição UNIQUE para e-mail: o arquivo não altera tabelas existentes. Não há contas ou senhas fixas no front-end.
 
-## Cadastrar uma conta
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-1. No login, clique em **Cadastrar usuário**.
-2. Informe nome, e-mail e senha (pelo menos 8 caracteres e no máximo 72 bytes).
-3. Clique em **Cadastrar**. O front-end envia `POST /api/register`.
-4. A API valida os dados, gera o hash da senha e salva o usuário com perfil `user`.
-5. Após o sucesso, a tela volta ao login. Digite as credenciais cadastradas para entrar.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-E-mail repetido retorna HTTP 409; dados inválidos retornam HTTP 400. O cadastro não aceita escolher o perfil de administrador. Para testar `admin`, o professor pode alterar a role da conta no banco, conforme o README do back-end, e fazer um novo login.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Roteiro para os alunos
+## Learn More
 
-1. Digite o e-mail e a senha de um usuário cadastrado com perfil `user` e clique em **Entrar**.
-2. Observe o perfil `user` e a lista de materiais, sem botão de exclusão.
-3. Clique em **Sair** e digite as credenciais de um usuário cadastrado com perfil `admin`.
-4. Observe o perfil `admin` e o botão **Excluir**. A confirmação deixa claro que a exclusão ocorre no banco.
-5. Saia e tente entrar com senha incorreta para observar a mensagem da API.
-6. Recarregue a página: a sessão fica apenas na memória, portanto será necessário entrar novamente.
+To learn more about Next.js, take a look at the following resources:
 
-## Onde estudar
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-- `app/page.tsx`: página inicial.
-- `app/page/Login.tsx`: formulário e estado da sessão.
-- `app/page/Register.tsx`: formulário de cadastro e retorno ao login.
-- `app/services/register.ts`: envia o cadastro para a API.
-- `app/page/Home.tsx`: consulta, exclusão e exibição conforme o perfil.
-- `app/services/login.ts`: envia e-mail e senha e recebe a sessão.
-- `app/services/api.ts`: endereço da API e mensagens de erro.
-- `app/globals.css`: aparência e adaptação para telas pequenas.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Fluxo de acesso
+## Deploy on Vercel
 
-O formulário envia `POST /api/login`. O back-end verifica a senha e devolve `token` e `user`. As consultas e exclusões enviam `Authorization: Bearer <token>`.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Autenticação identifica quem entrou. Autorização determina o que esse usuário pode fazer. Nome, e-mail e perfil vêm da resposta da API. O front-end usa `user.role` para mostrar o botão de exclusão, mas é o middleware do back-end que realmente bloqueia a operação para usuários comuns (HTTP 403).
-
-## Verificação
-
-```bash
-npm run lint
-npm run build
-```
-
-O cadastro prepara usuários; a lista de materiais depende da tabela `materials` e dos dados usados na aula de back-end.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

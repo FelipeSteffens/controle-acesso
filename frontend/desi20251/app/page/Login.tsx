@@ -37,7 +37,7 @@ export default function Login() {
   return (
     <main>
       <header>Controle de materiais · Aula de login e permissões</header>
-      {/* Sem sessão mostramos o login; com sessão mostramos os materiais. */}
+     
       {session ? (
         <Home session={session} onLogout={() => {
           setSession(null);
@@ -54,7 +54,7 @@ export default function Login() {
           <h1 id="login-title">Entrar</h1>
           <p>Digite o e-mail e a senha da sua conta.</p>
           {notice && <p className="success" role="status">{notice}</p>}
-          {/* As credenciais são digitadas pelo aluno; os dados e o perfil vêm da API. */}
+        
           <form onSubmit={submit}>
             <label htmlFor="email">E-mail</label>
             <input id="email" type="email" autoComplete="username" required
@@ -64,7 +64,7 @@ export default function Login() {
               disabled={busy} value={password} onChange={event => setPassword(event.target.value)} />
             {error && <p role="alert" className="error">{error}</p>}
             <button disabled={busy} type="submit">{busy ? "Entrando..." : "Entrar"}</button>
-            {/* Troca a tela sem recarregar a página. */}
+      
             <button type="button" className="secondary" disabled={busy} onClick={() => {
               setError("");
               setNotice("");
