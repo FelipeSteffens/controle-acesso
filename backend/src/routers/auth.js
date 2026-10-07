@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { login } from "../controllers/auth.js";
 import { register } from "../controllers/register.js";
-
+import { loginRateLimit } from "../middleware/loginRateLimit.js";
 
 const router = Router();
-
-router.post("/login", login);
+// Login ? p?blico: o aluno ainda n?o possui um token.
+router.post("/login", loginRateLimit(5, 15 * 60 * 1000), login);
+// Cadastro também é público: ainda não existe uma sessão.
 router.post("/register", register);
-
 export default router;
