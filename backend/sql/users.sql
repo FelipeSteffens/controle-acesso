@@ -10,3 +10,19 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Se a tabela já existir, confira sua estrutura com SHOW CREATE TABLE users.
 -- Ela precisa dos campos acima e de uma restrição UNIQUE para email.
+
+
+CREATE TABLE desi_20251.logs (
+  id INT NOT NULL AUTO_INCREMENT,
+  usuario INT NULL,
+  datahora DATETIME NULL DEFAULT CURRENT_TIMESTAMP,
+  acao VARCHAR(45) NULL,
+  recurso_afetado VARCHAR(45) NULL,
+  id_recurso_afetado VARCHAR(45) NULL,
+  valor_antigo VARCHAR(45) NULL,
+  valor_novo VARCHAR(45) NULL,
+  campos_alterados TEXT NULL,
+  ip VARCHAR(45) NULL,
+  codigo_http INT NULL,
+  status_acao VARCHAR(45) NULL,
+  PRIMARY KEY (id));

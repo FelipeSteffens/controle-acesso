@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { listMaterials, deleteMaterial, listComments, createComment } from "../controllers/materials.js";
+import { listMaterials, deleteMaterial } from "../controllers/materials.js";
 import { authenticate, requireRole } from "../middleware/auth.js";
 
 const router = Router();
@@ -7,8 +7,6 @@ const router = Router();
 router.use(authenticate);
 // Admin e usu?rio podem consultar.
 router.get("/", listMaterials);
-router.get("/:id/comments", listComments);
-router.post("/:id/comments", createComment);
 // AUTORIZA??O (RBAC): apenas o perfil admin pode excluir.
 router.delete("/:id", requireRole("admin"), deleteMaterial);
 export default router;

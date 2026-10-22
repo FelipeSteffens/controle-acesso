@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { api, errorMessage } from "../services/api";
 import type { Session } from "../services/login";
 
+// Campos devolvidos por GET /materials.
 type Material = { id: number; name: string; category: string };
-type Comment = { id: number; materialId: number; author: string; comment: string; createdAt: string };
 type Props = { session: Session; onLogout: () => void };
 
 export default function Home({ session, onLogout }: Props) {
@@ -15,22 +15,16 @@ export default function Home({ session, onLogout }: Props) {
   const [notice, setNotice] = useState("");
   const [deleting, setDeleting] = useState<number | null>(null);
   const [revision, setRevision] = useState(0);
-  const [search, setSearch] = useState("");
-  const [openMaterial, setOpenMaterial] = useState<number | null>(null);
-  const [comments, setComments] = useState<Record<number, Comment[]>>({});
-  const [commentDraft, setCommentDraft] = useState("");
-  const [commentError, setCommentError] = useState("");
-  const [commentBusy, setCommentBusy] = useState(false);
   const isAdmin = session.user.role === "admin";
 
-  
+  // Busca os materiais ao entrar e quando Atualizar muda revision.
   useEffect(() => {
-
+    // Não atualiza esta tela caso o usuário saia antes da resposta.
     let active = true;
     async function loadMaterials() {
       try {
         const response = await api.get<Material[]>("/materials", {
-          
+          // O token identifica o usuário nas rotas protegidas.
           headers: { Authorization: `Bearer ${session.token}` },
         });
         if (active) setMaterials(response.data);
@@ -57,11 +51,11 @@ export default function Home({ session, onLogout }: Props) {
     setError("");
     setNotice("");
     try {
-
+      // A API confere a role antes de excluir, mesmo se a tela for alterada.
       await api.delete(`/materials/${material.id}`, {
         headers: { Authorization: `Bearer ${session.token}` },
       });
-     
+      // Só remove da tela depois que a API confirma a exclusão (HTTP 204).
       setMaterials(current => current.filter(item => item.id !== material.id));
       setNotice(`${material.name} excluído.`);
     } catch (error) {
@@ -71,51 +65,6 @@ export default function Home({ session, onLogout }: Props) {
     }
   }
 
-  async function toggleComments(material: Material) {
-    setCommentError("");
-    if (openMaterial === material.id) {
-      setOpenMaterial(null);
-      setCommentDraft("");
-      return;
-    }
-    setOpenMaterial(material.id);
-    setCommentDraft("");
-    if (comments[material.id]) return;
-    try {
-      const response = await api.get<Comment[]>(`/materials/${material.id}/comments`, {
-        headers: { Authorization: `Bearer ${session.token}` },
-      });
-      setComments(current => ({ ...current, [material.id]: response.data }));
-    } catch (error) {
-      setCommentError(errorMessage(error));
-    }
-  }
-
-  async function addComment(material: Material) {
-    setCommentBusy(true);
-    setCommentError("");
-    try {
-      const response = await api.post<Comment>(`/materials/${material.id}/comments`,
-        { comment: commentDraft },
-        { headers: { Authorization: `Bearer ${session.token}` } }
-      );
-      setComments(current => ({
-        ...current,
-        [material.id]: [...(current[material.id] || []), response.data],
-      }));
-      setCommentDraft("");
-    } catch (error) {
-      setCommentError(errorMessage(error));
-    } finally {
-      setCommentBusy(false);
-    }
-  }
-
-  const filteredMaterials = materials.filter(material =>
-    `${material.name} ${material.category}`.toLocaleLowerCase("pt-BR")
-      .includes(search.trim().toLocaleLowerCase("pt-BR"))
-  );
-
   return (
     <section className="panel" aria-labelledby="materials-title">
       <div className="actions">
@@ -124,54 +73,21 @@ export default function Home({ session, onLogout }: Props) {
       </div>
       <h1 id="materials-title">Materiais</h1>
       <p>Perfil: <strong>{isAdmin ? "Administrador (admin)" : "Usuário comum (user)"}</strong></p>
-      <p>{isAdmin ? "Você pode consultar, comentar e excluir materiais." : "Você pode consultar os materiais e deixar comentários."}</p>
+      <p>{isAdmin ? "Você pode consultar e excluir materiais." : "Você pode apenas consultar os materiais."}</p>
       <p className="muted">Para comparar os perfis, saia e entre com a outra conta.</p>
       <button className="secondary" disabled={loading || deleting !== null} onClick={refresh}>
         Atualizar materiais
       </button>
-      <label htmlFor="material-search">Pesquisar material</label>
-      <input id="material-search" type="search" value={search}
-        onChange={event => setSearch(event.target.value)} placeholder="Nome ou categoria" />
       {error && <p className="error" role="alert">{error}</p>}
       {notice && <p className="success" role="status">{notice}</p>}
       {loading ? (
         <p role="status">Carregando materiais...</p>
       ) : (
         <ul className="materials">
-          {filteredMaterials.map(material => (
+          {materials.map(material => (
             <li key={material.id}>
-              <div className="material-info">
-                <span><strong>{material.name}</strong> · {material.category}</span>
-                <button className="secondary" type="button" onClick={() => toggleComments(material)}>
-                  {openMaterial === material.id ? "Fechar comentários" : "Comentários"}
-                </button>
-                {openMaterial === material.id && (
-                  <div className="comments">
-                    <h2>Comentários de {material.name}</h2>
-                    {commentError && <p className="error" role="alert">{commentError}</p>}
-                    <ul>
-                      {(comments[material.id] || []).map(item => (
-                        <li key={item.id}>
-                          <strong>{item.author}</strong>: {item.comment}
-                        </li>
-                      ))}
-                    </ul>
-                    {(comments[material.id] || []).length === 0 && !commentError &&
-                      <p className="muted">Ainda não há comentários.</p>}
-                    <form onSubmit={event => { event.preventDefault(); void addComment(material); }}>
-                      <label htmlFor={`comment-${material.id}`}>Escreva um comentário</label>
-                      <textarea id={`comment-${material.id}`} rows={3} maxLength={500}
-                        value={commentDraft} disabled={commentBusy}
-                        onChange={event => setCommentDraft(event.target.value)} required />
-                      <small>{[...commentDraft].length}/500 caracteres</small>
-                      <button type="submit" disabled={commentBusy || !commentDraft.trim()}>
-                        {commentBusy ? "Enviando..." : "Enviar comentário"}
-                      </button>
-                    </form>
-                  </div>
-                )}
-              </div>
-              
+              <span><strong>{material.name}</strong> · {material.category}</span>
+              {/* Esconder o botão ajuda na interface; a proteção fica na API. */}
               {isAdmin ? (
                 <button className="danger" disabled={deleting !== null} onClick={() => remove(material)}>
                   {deleting === material.id ? "Excluindo..." : "Excluir"}
@@ -184,8 +100,6 @@ export default function Home({ session, onLogout }: Props) {
         </ul>
       )}
       {!loading && !error && materials.length === 0 && <p>Nenhum material cadastrado.</p>}
-      {!loading && !error && materials.length > 0 && filteredMaterials.length === 0 &&
-        <p>Nenhum material encontrado para essa pesquisa.</p>}
     </section>
   );
 }
